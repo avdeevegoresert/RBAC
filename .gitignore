@@ -1,6 +1,5 @@
 *.class 
 target/ 
-com/ 
 .vscode/ 
 .idea/ 
 *.log 
