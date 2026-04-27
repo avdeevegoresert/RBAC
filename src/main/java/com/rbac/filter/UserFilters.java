@@ -16,6 +16,10 @@ public class UserFilters {
         return user -> user.email().equals(email);
     }
     
+    public static UserFilter byEmailContains(String substring) {
+        return user -> user.email().toLowerCase().contains(substring.toLowerCase());
+    }
+    
     public static UserFilter byEmailDomain(String domain) {
         return user -> user.email().toLowerCase().endsWith(domain.toLowerCase());
     }
