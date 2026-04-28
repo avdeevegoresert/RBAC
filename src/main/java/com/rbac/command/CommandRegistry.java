@@ -2,6 +2,7 @@ package com.rbac.command;
 
 import com.rbac.system.RBACSystem;
 import com.rbac.model.User;
+import com.rbac.report.ReportGenerator;
 import com.rbac.model.Role;
 import com.rbac.model.Permission;
 import com.rbac.model.AssignmentMetadata;
@@ -22,6 +23,7 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import com.rbac.report.ReportGenerator;
 
 public class CommandRegistry {
     
@@ -1059,6 +1061,44 @@ public class CommandRegistry {
                 
             } catch (IOException e) {
                 System.out.println("Error loading: " + e.getMessage());
+            }
+        });
+        // report-users
+        parser.registerCommand("report-users", "Отчет по пользователям", (scanner, sys) -> {
+            ReportGenerator rg = new ReportGenerator();
+            String report = rg.generateUserReport(sys.getUserManager(), sys.getAssignmentManager());
+            System.out.print(report);
+            System.out.print("Сохранить в файл? (yes/no): ");
+            if (scanner.nextLine().trim().equalsIgnoreCase("yes")) {
+                System.out.print("Имя файла: ");
+                String filename = scanner.nextLine().trim();
+                rg.exportToFile(report, filename);
+            }
+        });
+        
+        // report-roles
+        parser.registerCommand("report-roles", "Отчет по ролям", (scanner, sys) -> {
+            ReportGenerator rg = new ReportGenerator();
+            String report = rg.generateRoleReport(sys.getRoleManager(), sys.getAssignmentManager());
+            System.out.print(report);
+            System.out.print("Сохранить в файл? (yes/no): ");
+            if (scanner.nextLine().trim().equalsIgnoreCase("yes")) {
+                System.out.print("Имя файла: ");
+                String filename = scanner.nextLine().trim();
+                rg.exportToFile(report, filename);
+            }
+        });
+        
+        // report-matrix
+        parser.registerCommand("report-matrix", "Матрица прав", (scanner, sys) -> {
+            ReportGenerator rg = new ReportGenerator();
+            String report = rg.generatePermissionMatrix(sys.getUserManager(), sys.getAssignmentManager());
+            System.out.print(report);
+            System.out.print("Сохранить в файл? (yes/no): ");
+            if (scanner.nextLine().trim().equalsIgnoreCase("yes")) {
+                System.out.print("Имя файла: ");
+                String filename = scanner.nextLine().trim();
+                rg.exportToFile(report, filename);
             }
         });
         
