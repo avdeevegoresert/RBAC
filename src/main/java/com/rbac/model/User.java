@@ -1,28 +1,15 @@
 package com.rbac.model;
 
-import java.util.regex.Pattern;
+import com.rbac.util.ValidationUtils;
 
 public record User(String username, String fullName, String email) {
     
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-zA-Z0-9_]{3,20}$");
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@]+@[^@]+\\.[^@]+$");
-    
     public User {
-        if (username == null || username.trim().isEmpty()) {
-            throw new IllegalArgumentException("Username не может быть пустым");
-        }
-        if (fullName == null || fullName.trim().isEmpty()) {
-            throw new IllegalArgumentException("FullName не может быть пустым");
-        }
-        if (email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Email не может быть пустым");
-        }
-        if (!USERNAME_PATTERN.matcher(username).matches()) {
-            throw new IllegalArgumentException("Username должен содержать только латиницу, цифры и _, длина 3-20");
-        }
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
-            throw new IllegalArgumentException("Email должен содержать @ и точку");
-        }
+        ValidationUtils.requireNonEmpty(username, "Username");
+        ValidationUtils.requireNonEmpty(fullName, "FullName");
+        ValidationUtils.requireNonEmpty(email, "Email");
+        ValidationUtils.validateUsername(username);
+        ValidationUtils.validateEmail(email);
     }
     
     public static User create(String username, String fullName, String email) {

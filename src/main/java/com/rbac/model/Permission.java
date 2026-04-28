@@ -1,21 +1,16 @@
 package com.rbac.model;
 
+import com.rbac.util.ValidationUtils;
+
 public record Permission(String name, String resource, String description) {
     
     public Permission {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name не может быть пустым");
-        }
+        ValidationUtils.requireNonEmpty(name, "Name");
+        ValidationUtils.requireNonEmpty(resource, "Resource");
+        ValidationUtils.requireNonEmpty(description, "Description");
         if (name.contains(" ")) {
             throw new IllegalArgumentException("Name не должен содержать пробелов");
         }
-        if (resource == null || resource.trim().isEmpty()) {
-            throw new IllegalArgumentException("Resource не может быть пустым");
-        }
-        if (description == null || description.trim().isEmpty()) {
-            throw new IllegalArgumentException("Description не может быть пустым");
-        }
-        
         name = name.toUpperCase();
         resource = resource.toLowerCase();
     }
@@ -28,27 +23,24 @@ public record Permission(String name, String resource, String description) {
         if (namePattern == null && resourcePattern == null) {
             return true;
         }
-        boolean nameMatches = (namePattern == null) || name.contains(namePattern);
-        boolean resourceMatches = (resourcePattern == null) || resource.contains(resourcePattern);
-        return nameMatches && resourceMatches;
+        boolean nameMatch = (namePattern == null) || name.contains(namePattern);
+        boolean resourceMatch = (resourcePattern == null) || resource.contains(resourcePattern);
+        return nameMatch && resourceMatch;
     }
     
     public static void main(String[] args) {
         try {
             Permission p1 = new Permission("read", "users", "Can read user data");
             System.out.println(p1.format());
-            
             Permission p2 = new Permission("WRITE", "REPORTS", "Can modify reports");
             System.out.println(p2.format());
-            
             System.out.println(p1.matches("READ", "users"));
-            
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
         
         try {
-            Permission bad = new Permission("read write", "users", "test");
+            Permission p3 = new Permission("read write", "users", "test");
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }

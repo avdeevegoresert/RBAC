@@ -1,5 +1,6 @@
 package com.rbac.model;
 
+import com.rbac.util.ValidationUtils;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -8,12 +9,8 @@ public record AssignmentMetadata(String assignedBy, String assignedAt, String re
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     
     public AssignmentMetadata {
-        if (assignedBy == null || assignedBy.trim().isEmpty()) {
-            throw new IllegalArgumentException("assignedBy не может быть пустым");
-        }
-        if (assignedAt == null || assignedAt.trim().isEmpty()) {
-            throw new IllegalArgumentException("assignedAt не может быть пустым");
-        }
+        ValidationUtils.requireNonEmpty(assignedBy, "AssignedBy");
+        ValidationUtils.requireNonEmpty(assignedAt, "AssignedAt");
     }
     
     public static AssignmentMetadata now(String assignedBy, String reason) {
@@ -28,9 +25,8 @@ public record AssignmentMetadata(String assignedBy, String assignedAt, String re
     public String format() {
         if (reason == null || reason.trim().isEmpty()) {
             return String.format("Assigned by: %s at %s", assignedBy, assignedAt);
-        } else {
-            return String.format("Assigned by: %s at %s, reason: %s", assignedBy, assignedAt, reason);
         }
+        return String.format("Assigned by: %s at %s, reason: %s", assignedBy, assignedAt, reason);
     }
     
     public static void main(String[] args) {
