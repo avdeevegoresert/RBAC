@@ -3,7 +3,7 @@ package com.rbac.scheduler;
 import com.rbac.manager.UserManager;
 import com.rbac.manager.RoleManager;
 import com.rbac.manager.AssignmentManager;
-import com.rbac.audit.AuditLog;
+import com.rbac.audit.AsyncAuditLog;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +21,7 @@ class ScheduledTasksTest {
         UserManager userManager = new UserManager();
         RoleManager roleManager = new RoleManager();
         AssignmentManager assignmentManager = new AssignmentManager(userManager, roleManager);
-        AuditLog auditLog = new AuditLog();
+        AsyncAuditLog auditLog = new AsyncAuditLog();
         
         ScheduledTasks scheduler = ScheduledTasks.getInstance();
         scheduler.start(assignmentManager, auditLog);

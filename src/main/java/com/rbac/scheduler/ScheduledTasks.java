@@ -3,8 +3,9 @@ package com.rbac.scheduler;
 import com.rbac.manager.AssignmentManager;
 import com.rbac.model.RoleAssignment;
 import com.rbac.model.TemporaryAssignment;
-import com.rbac.audit.AuditLog;
+import com.rbac.audit.AsyncAuditLog;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +14,7 @@ public class ScheduledTasks {
     private static ScheduledTasks instance;
     private final ScheduledExecutorService scheduler;
     private AssignmentManager assignmentManager;
-    private AuditLog auditLog;
+    private AsyncAuditLog auditLog;
     private boolean running;
     
     private ScheduledTasks() {
@@ -28,7 +29,7 @@ public class ScheduledTasks {
         return instance;
     }
     
-    public void start(AssignmentManager assignmentManager, AuditLog auditLog) {
+    public void start(AssignmentManager assignmentManager, AsyncAuditLog auditLog) {
         if (running) {
             System.out.println("Планировщик уже запущен");
             return;
@@ -38,7 +39,6 @@ public class ScheduledTasks {
         this.auditLog = auditLog;
         this.running = true;
         
-        // Задача 1: каждые 30 секунд проверять истекшие временные назначения
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 checkExpiredAssignments();
@@ -47,7 +47,6 @@ public class ScheduledTasks {
             }
         }, 0, 30, TimeUnit.SECONDS);
         
-        // Задача 2: каждые 60 секунд писать статистику в лог
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 logStatistics();
