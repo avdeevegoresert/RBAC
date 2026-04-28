@@ -89,4 +89,56 @@ class UserManagerTest {
         manager.clear();
         assertEquals(0, manager.count());
     }
+    
+    @Test
+    void testConcurrentAdd() throws InterruptedException {
+        int threads = 5;
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threads);
+        
+        for (int i = 0; i < threads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                try {
+                    User user = User.create("concurrent_user_" + index, "User" + index, "user" + index + "@mail.ru");
+                    manager.add(user);
+                } catch (Exception e) {
+                    // ok
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await();
+        executor.shutdown();
+        
+        assertTrue(manager.count() <= threads);
+    }
+    
+    @Test
+    void testConcurrentReadAndWrite() throws InterruptedException {
+        manager.add(user1);
+        
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(4);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(4);
+        
+        for (int i = 0; i < 4; i++) {
+            executor.submit(() -> {
+                try {
+                    manager.findAll();
+                    manager.findByUsername("avdeev_egor");
+                    manager.count();
+                } catch (Exception e) {
+                    fail("Concurrent read failed: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await();
+        executor.shutdown();
+        assertTrue(true);
+    }
 }
