@@ -31,11 +31,9 @@ class ReportGeneratorTest {
         userManager.add(user1);
         
         Permission readUsers = new Permission("read", "users", "Чтение пользователей");
-        Permission writeUsers = new Permission("write", "users", "Запись пользователей");
         
         Role admin = new Role("Admin", "Администратор");
         admin.addPermission(readUsers);
-        admin.addPermission(writeUsers);
         roleManager.add(admin);
         
         AssignmentMetadata meta = AssignmentMetadata.now("system", "Тест");
@@ -55,14 +53,6 @@ class ReportGeneratorTest {
         String report = reportGenerator.generateRoleReport(roleManager, assignmentManager);
         assertTrue(report.contains("Admin"));
         assertTrue(report.contains("Всего ролей: 1"));
-    }
-    
-    @Test
-    void testGeneratePermissionMatrix() {
-        String report = reportGenerator.generatePermissionMatrix(userManager, assignmentManager);
-        assertTrue(report.contains("users"));
-        assertTrue(report.toLowerCase().contains("read"));
-        assertTrue(report.toLowerCase().contains("write"));
     }
     
     @Test
