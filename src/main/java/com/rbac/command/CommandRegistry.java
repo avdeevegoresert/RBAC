@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import com.rbac.report.ReportGenerator;
 import com.rbac.executor.BackgroundExecutor;
+import com.rbac.scheduler.ScheduledTasks;
 
 public class CommandRegistry {
     
@@ -1139,6 +1140,25 @@ public class CommandRegistry {
                 }
             });
             System.out.println("Сохранение запущено в фоновом режиме");
+        });
+
+        // scheduler-start
+        parser.registerCommand("scheduler-start", "Запустить планировщик задач", (scanner, sys) -> {
+            sys.startScheduler();
+        });
+        
+        // scheduler-stop
+        parser.registerCommand("scheduler-stop", "Остановить планировщик задач", (scanner, sys) -> {
+            sys.stopScheduler();
+        });
+        
+        // scheduler-status
+        parser.registerCommand("scheduler-status", "Статус планировщика", (scanner, sys) -> {
+            if (sys.getScheduler().isRunning()) {
+                System.out.println("Планировщик задач ЗАПУЩЕН");
+            } else {
+                System.out.println("Планировщик задач ОСТАНОВЛЕН");
+            }
         });
         
         // audit-log

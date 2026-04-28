@@ -89,4 +89,8 @@ public class TemporaryAssignment extends AbstractRoleAssignment {
             System.out.println(e.getMessage());
         }
     }
+
+    public void revoke() {
+    this.expiresAt = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
+    }
 }

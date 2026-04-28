@@ -9,12 +9,14 @@ import com.rbac.model.Permission;
 import com.rbac.model.AssignmentMetadata;
 import com.rbac.model.PermanentAssignment;
 import com.rbac.audit.AuditLog;
+import com.rbac.scheduler.ScheduledTasks;
 
 public class RBACSystem {
     private final UserManager userManager;
     private final RoleManager roleManager;
     private final AssignmentManager assignmentManager;
     private final AuditLog auditLog;
+    private final ScheduledTasks scheduler;
     private String currentUser;
     
     public RBACSystem() {
@@ -22,6 +24,7 @@ public class RBACSystem {
         this.roleManager = new RoleManager();
         this.assignmentManager = new AssignmentManager(userManager, roleManager);
         this.auditLog = new AuditLog();
+        this.scheduler = ScheduledTasks.getInstance();
         this.currentUser = "system";
     }
     
@@ -41,12 +44,24 @@ public class RBACSystem {
         return auditLog;
     }
     
+    public ScheduledTasks getScheduler() {
+        return scheduler;
+    }
+    
     public void setCurrentUser(String username) {
         this.currentUser = username;
     }
     
     public String getCurrentUser() {
         return currentUser;
+    }
+    
+    public void startScheduler() {
+        scheduler.start(assignmentManager, auditLog);
+    }
+    
+    public void stopScheduler() {
+        scheduler.stop();
     }
     
     public void initialize() {
