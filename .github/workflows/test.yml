@@ -2,7 +2,7 @@ name: Run Tests
 
 on:
   push:
-    branches: [ dev, feature/managers, feature/commands, feature/util, feature/threadsafe-managers ]
+    branches: [ dev, feature/managers, feature/commands, feature/util, feature/threadsafe-managers, feature/parallel-logs, feature/workers ]
   pull_request:
     branches: [ dev ]
 
