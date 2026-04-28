@@ -8,12 +8,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConsoleUtilsTest {
     
     @Test
-    void testPromptYesNoLogic() {
-        assertTrue(ConsoleUtils.promptYesNo(null, "test"));
-        assertFalse(ConsoleUtils.promptYesNo(null, "test"));
-    }
-    
-    @Test
     void testPromptChoiceList() {
         List<String> options = Arrays.asList("Admin", "User", "Viewer");
         assertNotNull(options);
