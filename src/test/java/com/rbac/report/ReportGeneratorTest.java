@@ -65,4 +65,20 @@ class ReportGeneratorTest {
         assertTrue(file.exists());
         file.delete();
     }
+
+    @Test
+    void testGenerateUserReportParallel() {
+        String report = reportGenerator.generateUserReportParallel(userManager, assignmentManager);
+        assertNotNull(report);
+        assertTrue(report.contains("parallel"));
+        assertTrue(report.contains("avdeev_egor"));
+    }
+    
+    @Test
+    void testGeneratePermissionMatrixParallel() {
+        String report = reportGenerator.generatePermissionMatrixParallel(userManager, assignmentManager);
+        assertNotNull(report);
+        assertTrue(report.contains("parallel"));
+        assertTrue(report.contains("users"));
+    }
 }
