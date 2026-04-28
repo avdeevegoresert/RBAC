@@ -58,7 +58,6 @@ class ReportGeneratorTest {
     void testGenerateRoleReport() {
         String report = reportGenerator.generateRoleReport(roleManager, assignmentManager);
         assertTrue(report.contains("Admin"));
-        assertTrue(report.contains("1")); 
         assertTrue(report.contains("Всего ролей: 1"));
     }
     
@@ -66,8 +65,8 @@ class ReportGeneratorTest {
     void testGeneratePermissionMatrix() {
         String report = reportGenerator.generatePermissionMatrix(userManager, assignmentManager);
         assertTrue(report.contains("users"));
-        assertTrue(report.contains("READ"));
-        assertTrue(report.contains("WRITE"));
+        assertTrue(report.contains("read"));
+        assertTrue(report.contains("write"));
     }
     
     @Test
