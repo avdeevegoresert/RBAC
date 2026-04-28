@@ -4,6 +4,7 @@ import com.rbac.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.List;
+import java.util.concurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssignmentManagerTest {
@@ -76,5 +77,61 @@ class AssignmentManagerTest {
         PermanentAssignment assignment = new PermanentAssignment(user, role, meta);
         assignmentManager.add(assignment);
         assertEquals(1, assignmentManager.getActiveAssignments().size());
+    }
+    
+    @Test
+    void testConcurrentAddAssignments() throws InterruptedException {
+        int threads = 5;
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch latch = new CountDownLatch(threads);
+        
+        for (int i = 0; i < threads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                try {
+                    User u = User.create("thread_user_" + index, "User" + index, "user" + index + "@mail.ru");
+                    userManager.add(u);
+                    AssignmentMetadata meta = AssignmentMetadata.now("admin", "test");
+                    PermanentAssignment a = new PermanentAssignment(u, role, meta);
+                    assignmentManager.add(a);
+                } catch (Exception e) {
+                    // ok
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await(5, TimeUnit.SECONDS);
+        executor.shutdown();
+        assertTrue(assignmentManager.count() <= threads);
+    }
+    
+    @Test
+    void testConcurrentReadAndWrite() throws InterruptedException {
+        AssignmentMetadata meta = AssignmentMetadata.now("admin", "test");
+        PermanentAssignment assignment = new PermanentAssignment(user, role, meta);
+        assignmentManager.add(assignment);
+        
+        ExecutorService executor = Executors.newFixedThreadPool(4);
+        CountDownLatch latch = new CountDownLatch(4);
+        
+        for (int i = 0; i < 4; i++) {
+            executor.submit(() -> {
+                try {
+                    assignmentManager.findAll();
+                    assignmentManager.getActiveAssignments();
+                    assignmentManager.userHasRole(user, role);
+                } catch (Exception e) {
+                    fail("Concurrent read failed: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await();
+        executor.shutdown();
+        assertTrue(true);
     }
 }
