@@ -84,7 +84,7 @@ public class CommandRegistry {
             }
         });
         
-        // user-create
+        
         parser.registerCommand("user-create", "Create new user", (scanner, sys) -> {
             try {
                 System.out.print("Username: ");
@@ -97,6 +97,7 @@ public class CommandRegistry {
                 User user = User.create(username, fullName, email);
                 sys.getUserManager().add(user);
                 System.out.println("User created: " + user.format());
+                sys.getAuditLog().log("CREATE_USER", sys.getCurrentUser(), username, "Создан пользователь " + username);
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
             }
@@ -166,7 +167,7 @@ public class CommandRegistry {
             }
         });
         
-        // user-delete
+                // user-delete
         parser.registerCommand("user-delete", "Delete user", (scanner, sys) -> {
             System.out.print("Username: ");
             String username = scanner.nextLine().trim();
@@ -191,6 +192,7 @@ public class CommandRegistry {
             }
             sys.getUserManager().remove(user);
             System.out.println("User deleted");
+            sys.getAuditLog().log("DELETE_USER", sys.getCurrentUser(), username, "Удален пользователь " + username);
         });
         
         // user-search
@@ -245,7 +247,7 @@ public class CommandRegistry {
             System.out.println();
         });
         
-        // role-create
+                // role-create
         parser.registerCommand("role-create", "Create new role", (scanner, sys) -> {
             System.out.print("Role name: ");
             String name = scanner.nextLine().trim();
@@ -255,6 +257,7 @@ public class CommandRegistry {
             Role role = new Role(name, desc);
             sys.getRoleManager().add(role);
             System.out.println("Role created: " + name);
+            sys.getAuditLog().log("CREATE_ROLE", sys.getCurrentUser(), name, "Создана роль " + name);
             
             System.out.print("Add permissions now? (yes/no): ");
             if (scanner.nextLine().trim().equalsIgnoreCase("yes")) {
@@ -320,7 +323,7 @@ public class CommandRegistry {
             System.out.println("Role updated");
         });
         
-        // role-delete
+                // role-delete
         parser.registerCommand("role-delete", "Delete role", (scanner, sys) -> {
             System.out.print("Role name: ");
             String name = scanner.nextLine().trim();
@@ -347,6 +350,7 @@ public class CommandRegistry {
             
             sys.getRoleManager().remove(role);
             System.out.println("Role deleted");
+            sys.getAuditLog().log("DELETE_ROLE", sys.getCurrentUser(), name, "Удалена роль " + name);
         });
         
         // role-add-permission
@@ -520,6 +524,7 @@ public class CommandRegistry {
                     sys.getAssignmentManager().add(assignment);
                 }
                 System.out.println("Role assigned successfully");
+                sys.getAuditLog().log("ASSIGN_ROLE", sys.getCurrentUser(), username,"Назначена роль " + role.getName() + " пользователю " + username);
             } catch (IllegalArgumentException e) {
                 System.out.println("Error: " + e.getMessage());
             }
@@ -563,6 +568,7 @@ public class CommandRegistry {
             
             sys.getAssignmentManager().revokeAssignment(assignments.get(choice).assignmentId());
             System.out.println("Assignment revoked");
+            sys.getAuditLog().log("REVOKE_ROLE", sys.getCurrentUser(), username, "Отозвана роль у пользователя " + username);
         });
         
         // assignment-list
@@ -1054,6 +1060,18 @@ public class CommandRegistry {
             } catch (IOException e) {
                 System.out.println("Error loading: " + e.getMessage());
             }
+        });
+        
+        // audit-log
+        parser.registerCommand("audit-log", "Show audit log", (sc, sy) -> {
+            sy.getAuditLog().printLog();
+        });
+        
+        // audit-log-save
+        parser.registerCommand("audit-log-save", "Save audit log to file", (sc, sy) -> {
+            System.out.print("Filename: ");
+            String logFile = sc.nextLine().trim();
+            sy.getAuditLog().saveToFile(logFile);
         });
     }
 }
