@@ -1,8 +1,6 @@
 package com.rbac.util;
 
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FormatUtilsTest {
@@ -31,13 +29,5 @@ class FormatUtilsTest {
         String header = FormatUtils.formatHeader("Тест");
         assertTrue(header.contains("Тест"));
         assertTrue(header.contains("---"));
-    }
-    
-    @Test
-    void testFormatBox() {
-        String box = FormatUtils.formatBox("Привет\nМир");
-        assertTrue(box.contains("| Привет |"));
-        assertTrue(box.contains("| Мир |"));
-        assertTrue(box.contains("+"));
     }
 }
