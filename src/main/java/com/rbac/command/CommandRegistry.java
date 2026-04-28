@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import com.rbac.report.ReportGenerator;
+import com.rbac.executor.BackgroundExecutor;
 
 public class CommandRegistry {
     
@@ -1100,6 +1101,44 @@ public class CommandRegistry {
                 String filename = scanner.nextLine().trim();
                 rg.exportToFile(report, filename);
             }
+        });
+        
+        // report-users-async
+        parser.registerCommand("report-users-async", "Асинхронный отчет по пользователям", (scanner, sys) -> {
+            BackgroundExecutor.getInstance().submit(() -> {
+                ReportGenerator rg = new ReportGenerator();
+                String report = rg.generateUserReportParallel(sys.getUserManager(), sys.getAssignmentManager());
+                System.out.println("\n" + report);
+            });
+            System.out.println("Генерация отчета запущена в фоновом режиме");
+        });
+        
+        // save-async
+        parser.registerCommand("save-async", "Асинхронное сохранение данных", (scanner, sys) -> {
+            System.out.print("Имя файла: ");
+            String filename = scanner.nextLine().trim();
+            BackgroundExecutor.getInstance().submit(() -> {
+                try {
+                    java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.FileWriter(filename));
+                    writer.println("[USERS]");
+                    for (User u : sys.getUserManager().findAll()) {
+                        writer.println(u.username() + "|" + u.fullName() + "|" + u.email());
+                    }
+                    writer.println("[ROLES]");
+                    for (Role r : sys.getRoleManager().findAll()) {
+                        writer.print(r.getId() + "|" + r.getName() + "|" + r.getDescription());
+                        for (Permission p : r.getPermissions()) {
+                            writer.print("|" + p.name() + ":" + p.resource() + ":" + p.description());
+                        }
+                        writer.println();
+                    }
+                    writer.close();
+                    System.out.println("Данные сохранены в " + filename);
+                } catch (Exception e) {
+                    System.err.println("Ошибка сохранения: " + e.getMessage());
+                }
+            });
+            System.out.println("Сохранение запущено в фоновом режиме");
         });
         
         // audit-log
