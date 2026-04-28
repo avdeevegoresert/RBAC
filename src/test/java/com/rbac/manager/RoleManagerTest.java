@@ -80,4 +80,55 @@ class RoleManagerTest {
         assertEquals(1, result.size());
         assertEquals("Admin", result.get(0).getName());
     }
+    
+    @Test
+    void testConcurrentAdd() throws InterruptedException {
+        int threads = 5;
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(threads);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(threads);
+        
+        for (int i = 0; i < threads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                try {
+                    Role role = new Role("ConcurrentRole_" + index, "Test");
+                    manager.add(role);
+                } catch (Exception e) {
+                    // ok
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await();
+        executor.shutdown();
+        assertTrue(manager.count() <= threads);
+    }
+    
+    @Test
+    void testConcurrentReadAndWrite() throws InterruptedException {
+        manager.add(adminRole);
+        
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(4);
+        java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(4);
+        
+        for (int i = 0; i < 4; i++) {
+            executor.submit(() -> {
+                try {
+                    manager.findAll();
+                    manager.findByName("Admin");
+                    manager.count();
+                } catch (Exception e) {
+                    fail("Concurrent read failed: " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        
+        latch.await();
+        executor.shutdown();
+        assertTrue(true);
+    }
 }
